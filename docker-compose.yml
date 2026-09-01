@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  finagent:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me-in-prod}
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - finagent_data:/app/data
+
+volumes:
+  finagent_data:

@@ -1,0 +1,132 @@
+{
+  "total_cases": 8,
+  "passed": 3,
+  "pass_rate": 0.375,
+  "avg_latency_ms": 1252.8,
+  "results": [
+    {
+      "id": "quote-basic",
+      "question": "What is AAPL trading at right now?",
+      "expected_tools": [
+        "market_data"
+      ],
+      "actual_tools": [
+        "market_data"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "AAPL"
+      ],
+      "latency_ms": 1670.6,
+      "answer_preview": "**AAPL (Apple Inc.) is currently trading at\u202f**`$316.85`** (USD).**  \n\n*This information reflects the latest quote available at the time of the query.*  \n\n*Pleas",
+      "overall_pass": true
+    },
+    {
+      "id": "history-trend",
+      "question": "Show me the price history trend for MSFT over the last month",
+      "expected_tools": [
+        "market_data"
+      ],
+      "actual_tools": [
+        "market_data"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "MSFT"
+      ],
+      "latency_ms": 2102.5,
+      "answer_preview": "**Microsoft Corp. (MSFT) \u2013 1\u2011month price trend (most recent 21 trading days)**  \n\n| Date (most recent) | Close\u202f$ |\n|--------------------|--------|\n| Day\u202f1 (star",
+      "overall_pass": true
+    },
+    {
+      "id": "news-basic",
+      "question": "Any recent news on TSLA?",
+      "expected_tools": [
+        "news_search"
+      ],
+      "actual_tools": [
+        "news_search"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "TSLA"
+      ],
+      "latency_ms": 3001.2,
+      "answer_preview": "Here\u2019s a quick rundown of the most recent headlines involving **Tesla\u202f(TSLA)** (all published on\u202fSeptember\u202f1,\u202f2026):\n\n| Time (UTC) | Headline | Key Points |\n|--",
+      "overall_pass": true
+    },
+    {
+      "id": "portfolio-value",
+      "question": "What is my portfolio worth right now?",
+      "expected_tools": [
+        "portfolio"
+      ],
+      "actual_tools": [
+        "portfolio"
+      ],
+      "tool_pass": true,
+      "keyword_pass": false,
+      "keyword_hits": [],
+      "latency_ms": 2905.4,
+      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "overall_pass": false
+    },
+    {
+      "id": "portfolio-list",
+      "question": "List my current holdings",
+      "expected_tools": [
+        "portfolio"
+      ],
+      "actual_tools": [],
+      "tool_pass": false,
+      "keyword_pass": false,
+      "keyword_hits": [],
+      "latency_ms": 85.9,
+      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "overall_pass": false
+    },
+    {
+      "id": "calc-basic",
+      "question": "calculate (150.25 - 120.10) / 120.10 * 100",
+      "expected_tools": [
+        "calculator"
+      ],
+      "actual_tools": [],
+      "tool_pass": false,
+      "keyword_pass": false,
+      "keyword_hits": [],
+      "latency_ms": 83.2,
+      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "overall_pass": false
+    },
+    {
+      "id": "sql-log",
+      "question": "How many times have I asked questions before, check the log",
+      "expected_tools": [
+        "sql_query"
+      ],
+      "actual_tools": [],
+      "tool_pass": false,
+      "keyword_pass": false,
+      "keyword_hits": [],
+      "latency_ms": 91.5,
+      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "overall_pass": false
+    },
+    {
+      "id": "compliance-grounding",
+      "question": "Should I put my entire savings into one stock?",
+      "expected_tools": [],
+      "actual_tools": [],
+      "tool_pass": true,
+      "keyword_pass": false,
+      "keyword_hits": [],
+      "latency_ms": 81.8,
+      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "overall_pass": false
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "quote-basic",
+    "question": "What is AAPL trading at right now?",
+    "expected_tools": ["market_data"],
+    "expect_keywords": ["AAPL"]
+  },
+  {
+    "id": "history-trend",
+    "question": "Show me the price history trend for MSFT over the last month",
+    "expected_tools": ["market_data"],
+    "expect_keywords": ["MSFT"]
+  },
+  {
+    "id": "news-basic",
+    "question": "Any recent news on TSLA?",
+    "expected_tools": ["news_search"],
+    "expect_keywords": ["TSLA"]
+  },
+  {
+    "id": "portfolio-value",
+    "question": "What is my portfolio worth right now?",
+    "expected_tools": ["portfolio"],
+    "expect_keywords": ["portfolio"]
+  },
+  {
+    "id": "portfolio-list",
+    "question": "List my current holdings",
+    "expected_tools": ["portfolio"],
+    "expect_keywords": ["Holdings"]
+  },
+  {
+    "id": "calc-basic",
+    "question": "calculate (150.25 - 120.10) / 120.10 * 100",
+    "expected_tools": ["calculator"],
+    "expect_keywords": ["="]
+  },
+  {
+    "id": "sql-log",
+    "question": "How many times have I asked questions before, check the log",
+    "expected_tools": ["sql_query"],
+    "expect_keywords": ["rows", "row"]
+  },
+  {
+    "id": "compliance-grounding",
+    "question": "Should I put my entire savings into one stock?",
+    "expected_tools": [],
+    "expect_keywords": ["not personalized financial advice"]
+  }
+]

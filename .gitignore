@@ -1,0 +1,13 @@
+.env
+*.env
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+*.db
+*.db-shm
+*.db-wal
+data/cache/
+data/vector_index.pkl
+.DS_Store
