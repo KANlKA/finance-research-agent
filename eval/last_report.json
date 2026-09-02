@@ -1,8 +1,8 @@
 {
   "total_cases": 8,
-  "passed": 3,
-  "pass_rate": 0.375,
-  "avg_latency_ms": 1252.8,
+  "passed": 7,
+  "pass_rate": 0.875,
+  "avg_latency_ms": 5253.5,
   "results": [
     {
       "id": "quote-basic",
@@ -18,8 +18,8 @@
       "keyword_hits": [
         "AAPL"
       ],
-      "latency_ms": 1670.6,
-      "answer_preview": "**AAPL (Apple Inc.) is currently trading at\u202f**`$316.85`** (USD).**  \n\n*This information reflects the latest quote available at the time of the query.*  \n\n*Pleas",
+      "latency_ms": 2426.0,
+      "answer_preview": "**Current price for AAPL (Apple\u202fInc.)**: **$325.13** (USD) per share.\n\n*This information reflects the latest market quote at the time of the query. It is provid",
       "overall_pass": true
     },
     {
@@ -36,8 +36,8 @@
       "keyword_hits": [
         "MSFT"
       ],
-      "latency_ms": 2102.5,
-      "answer_preview": "**Microsoft Corp. (MSFT) \u2013 1\u2011month price trend (most recent 21 trading days)**  \n\n| Date (most recent) | Close\u202f$ |\n|--------------------|--------|\n| Day\u202f1 (star",
+      "latency_ms": 4035.7,
+      "answer_preview": "**Microsoft Corp. (MSFT) \u2013 1\u2011Month Price Trend**\n\n| Day\u202f# | Closing price (USD) |\n|-------|--------------------|\n| 1 | 486.73 |\n| 2 | 491.88 |\n| 3 | 486.54 |\n| ",
       "overall_pass": true
     },
     {
@@ -54,8 +54,8 @@
       "keyword_hits": [
         "TSLA"
       ],
-      "latency_ms": 3001.2,
-      "answer_preview": "Here\u2019s a quick rundown of the most recent headlines involving **Tesla\u202f(TSLA)** (all published on\u202fSeptember\u202f1,\u202f2026):\n\n| Time (UTC) | Headline | Key Points |\n|--",
+      "latency_ms": 3535.0,
+      "answer_preview": "Here are the most recent headlines (all published\u202fwithin the last\u202f48\u202fhours) for **Tesla\u202fInc. (TSLA)**, along with a brief takeaway for each story:\n\n| Date (UTC)",
       "overall_pass": true
     },
     {
@@ -68,11 +68,13 @@
         "portfolio"
       ],
       "tool_pass": true,
-      "keyword_pass": false,
-      "keyword_hits": [],
-      "latency_ms": 2905.4,
-      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
-      "overall_pass": false
+      "keyword_pass": true,
+      "keyword_hits": [
+        "portfolio"
+      ],
+      "latency_ms": 7930.4,
+      "answer_preview": "Your portfolio\u2019s current market value is **$5,756.40**.\n\n*This is simply a snapshot of the holdings you have in the system and is not personalized investment ad",
+      "overall_pass": true
     },
     {
       "id": "portfolio-list",
@@ -80,13 +82,20 @@
       "expected_tools": [
         "portfolio"
       ],
-      "actual_tools": [],
-      "tool_pass": false,
-      "keyword_pass": false,
-      "keyword_hits": [],
-      "latency_ms": 85.9,
-      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
-      "overall_pass": false
+      "actual_tools": [
+        "portfolio"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "portfolio",
+        "AAPL",
+        "MSFT",
+        "shares"
+      ],
+      "latency_ms": 10692.8,
+      "answer_preview": "Here are the securities you currently hold in your portfolio:\n\n| Symbol | Shares | Cost basis (per share) | Total cost basis |\n|--------|--------|--------------",
+      "overall_pass": true
     },
     {
       "id": "calc-basic",
@@ -94,13 +103,18 @@
       "expected_tools": [
         "calculator"
       ],
-      "actual_tools": [],
-      "tool_pass": false,
-      "keyword_pass": false,
-      "keyword_hits": [],
-      "latency_ms": 83.2,
-      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
-      "overall_pass": false
+      "actual_tools": [
+        "calculator"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "25.1",
+        "25.10"
+      ],
+      "latency_ms": 1683.4,
+      "answer_preview": "**Result:**\u202f25.10\u202f% (approximately)\n\n*This calculation shows a 25.10\u202f% increase from\u202f120.10\u202fto\u202f150.25.*\n\n*Note: This is a straightforward arithmetic result and ",
+      "overall_pass": true
     },
     {
       "id": "sql-log",
@@ -108,13 +122,19 @@
       "expected_tools": [
         "sql_query"
       ],
-      "actual_tools": [],
-      "tool_pass": false,
-      "keyword_pass": false,
-      "keyword_hits": [],
-      "latency_ms": 91.5,
-      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
-      "overall_pass": false
+      "actual_tools": [
+        "sql_query"
+      ],
+      "tool_pass": true,
+      "keyword_pass": true,
+      "keyword_hits": [
+        "questions",
+        "asked",
+        "log"
+      ],
+      "latency_ms": 6860.8,
+      "answer_preview": "You\u2019ve asked **15 questions** so far (according to the query log).  \n\n*This is just a count of your past queries\u2014not personalized financial advice.*",
+      "overall_pass": true
     },
     {
       "id": "compliance-grounding",
@@ -124,8 +144,8 @@
       "tool_pass": true,
       "keyword_pass": false,
       "keyword_hits": [],
-      "latency_ms": 81.8,
-      "answer_preview": "I hit an error while reasoning about this: Client error '429 Too Many Requests' for url 'https://api.groq.com/openai/v1/chat/completions'\nFor more information c",
+      "latency_ms": 4863.7,
+      "answer_preview": "**Short answer:**\u202fNo.  Putting all (or even most) of your savings into a single stock is generally considered\u202f*extremely risky*\u202fand is not a prudent way to buil",
       "overall_pass": false
     }
   ]

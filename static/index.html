@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  :root{
+    --bg: #0B0E11;
+    --panel: #12161C;
+    --panel-line: #232A32;
+    --ink: #E7E3D8;
+    --ink-dim: #8B9098;
+    --gold: #C9A227;
+    --gold-dim: #7A6420;
+    --user-bubble: #1B2128;
+    --up: #4C8C6B;
+    --down: #C1543C;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; margin:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  /* ---- Auth screen ---- */
+  #auth{
+    margin: auto;
+    width: 340px;
+    padding: 32px;
+    border: 1px solid var(--panel-line);
+    background: var(--panel);
+  }
+  #auth h1{
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    margin: 0 0 4px;
+  }
+  #auth p.sub{ color: var(--ink-dim); margin: 0 0 24px; font-size: 14px; }
+  #auth input{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--panel-line);
+    color: var(--ink);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  #auth input:focus{ outline: none; border-color: var(--gold-dim); }
+  #auth .row{ display:flex; gap:8px; margin-top: 14px; }
+  button{
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 9px 16px;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover{ border-color: var(--gold); background: rgba(201,162,39,0.08); }
+  button.primary{ background: var(--gold-dim); color: #0B0E11; border-color: var(--gold-dim); }
+  button.primary:hover{ background: var(--gold); }
+  #auth-error{ color: var(--down); font-size: 13px; margin-top: 8px; min-height: 16px; }
+
+  /* ---- App shell ---- */
+  #app{ display:none; width:100%; height:100%; }
+  #app.active{ display:flex; }
+
+  #sidebar{
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--panel-line);
+    display:flex;
+    flex-direction: column;
+  }
+  #sidebar .brand{
+    padding: 20px 18px 14px;
+    border-bottom: 1px solid var(--panel-line);
+  }
+  #sidebar .brand h1{
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 19px;
+    margin: 0;
+  }
+  #sidebar .brand .who{ color: var(--ink-dim); font-size: 12px; margin-top: 3px; }
+  #new-thread{ margin: 14px 16px; }
+  #thread-list{ flex:1; overflow-y: auto; padding: 0 8px; }
+  .thread-item{
+    padding: 10px 10px;
+    color: var(--ink-dim);
+    font-size: 13px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .thread-item:hover{ color: var(--ink); }
+  .thread-item.active{ color: var(--gold); border-left-color: var(--gold); background: rgba(201,162,39,0.06); }
+
+  #logout{ margin: 14px 16px; align-self: flex-start; }
+
+  /* ---- Main ---- */
+  #main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  #messages{ flex:1; overflow-y:auto; padding: 28px 0; }
+  #messages .empty{
+    color: var(--ink-dim);
+    text-align:center;
+    margin-top: 80px;
+    font-size: 14px;
+  }
+  .msg{ max-width: 720px; margin: 0 auto 22px; padding: 0 28px; }
+  .msg .role{ font-size: 11px; color: var(--ink-dim); margin-bottom: 6px; font-family: var(--mono); }
+  .msg.user .bubble{
+    background: var(--user-bubble);
+    padding: 10px 14px;
+    display: inline-block;
+    border-left: 2px solid var(--gold-dim);
+  }
+  .msg.assistant .bubble{ line-height: 1.55; font-size: 14.5px; }
+  .msg.assistant .bubble table{ border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+  .msg.assistant .bubble th, .msg.assistant .bubble td{
+    border: 1px solid var(--panel-line);
+    padding: 5px 10px;
+    font-family: var(--mono);
+  }
+  .msg.assistant .bubble th{ color: var(--gold); text-align:left; }
+  .msg.assistant .bubble code{ font-family: var(--mono); background: var(--panel); padding: 1px 5px; }
+  .msg.assistant .bubble a{ color: var(--gold); }
+
+  .trace{ margin-top: 10px; display:flex; flex-wrap:wrap; gap:6px; }
+  .trace .chip{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    border: 1px solid var(--panel-line);
+    padding: 3px 8px;
+  }
+  .trace .chip.live{ color: var(--gold); border-color: var(--gold-dim); }
+  .trace .chip.hit{ color: var(--up); }
+
+  #composer{
+    border-top: 1px solid var(--panel-line);
+    padding: 16px 28px 22px;
+  }
+  #composer form{ max-width: 720px; margin: 0 auto; display:flex; gap: 10px; }
+  #composer input{
+    flex:1;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    color: var(--ink);
+    padding: 12px 14px;
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  #composer input:focus{ outline:none; border-color: var(--gold-dim); }
+  #composer .hint{ max-width: 720px; margin: 8px auto 0; color: var(--ink-dim); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div id="auth">
+  <h1>Research Desk</h1>
+  <p class="sub">Sign in to your financial research agent.</p>
+  <input id="auth-username" placeholder="Username" autocomplete="username">
+  <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password">
+  <div class="row">
+    <button class="primary" onclick="login()">Sign in</button>
+    <button onclick="register()">Create account</button>
+  </div>
+  <div id="auth-error"></div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="brand">
+      <h1>Research Desk</h1>
+      <div class="who" id="who"></div>
+    </div>
+    <button id="new-thread" onclick="newThread()">Start new thread</button>
+    <div id="thread-list"></div>
+    <button id="logout" onclick="logout()">Sign out</button>
+  </div>
+  <div id="main">
+    <div id="messages"><div class="empty">No thread selected. Start one on the left, or just ask a question below.</div></div>
+    <div id="composer">
+      <form onsubmit="return sendMessage(event)">
+        <input id="question" placeholder="Ask about a ticker, your holdings, recent filings, or the market" autocomplete="off">
+        <button class="primary" type="submit">Ask</button>
+      </form>
+      <div class="hint">Each answer streams live as the agent retrieves context, calls tools, and reasons through the question.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = ""; // same origin
+let token = localStorage.getItem("finagent_token") || "";
+let username = localStorage.getItem("finagent_username") || "";
+let currentThread = null;
+
+function setError(msg){ document.getElementById("auth-error").textContent = msg || ""; }
+
+async function register(){
+  const u = document.getElementById("auth-username").value.trim();
+  const p = document.getElementById("auth-password").value;
+  if(!u || !p){ setError("Enter a username and password."); return; }
+  const res = await fetch(API + "/auth/register", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({username:u, password:p})
+  });
+  const data = await res.json();
+  if(!res.ok){ setError(data.detail || "Registration failed."); return; }
+  token = data.access_token; username = u;
+  localStorage.setItem("finagent_token", token);
+  localStorage.setItem("finagent_username", username);
+  enterApp();
+}
+
+async function login(){
+  const u = document.getElementById("auth-username").value.trim();
+  const p = document.getElementById("auth-password").value;
+  if(!u || !p){ setError("Enter a username and password."); return; }
+  const form = new URLSearchParams();
+  form.set("username", u); form.set("password", p);
+  const res = await fetch(API + "/auth/login", { method: "POST", body: form });
+  const data = await res.json();
+  if(!res.ok){ setError(data.detail || "Login failed."); return; }
+  token = data.access_token; username = u;
+  localStorage.setItem("finagent_token", token);
+  localStorage.setItem("finagent_username", username);
+  enterApp();
+}
+
+function logout(){
+  token = ""; localStorage.removeItem("finagent_token"); localStorage.removeItem("finagent_username");
+  document.getElementById("app").classList.remove("active");
+  document.getElementById("auth").style.display = "block";
+}
+
+function authHeaders(extra){
+  return Object.assign({"Authorization": "Bearer " + token}, extra || {});
+}
+
+async function enterApp(){
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").classList.add("active");
+  document.getElementById("who").textContent = username;
+  await loadThreads();
+}
+
+async function loadThreads(){
+  const res = await fetch(API + "/conversations", { headers: authHeaders() });
+  if(!res.ok) return;
+  const data = await res.json();
+  const list = document.getElementById("thread-list");
+  list.innerHTML = "";
+  data.conversations.forEach(c => {
+    const el = document.createElement("div");
+    el.className = "thread-item" + (c.id === currentThread ? " active" : "");
+    el.textContent = (c.title || c.id.slice(0,8)) + "";
+    el.onclick = () => openThread(c.id);
+    list.appendChild(el);
+  });
+}
+
+async function newThread(){
+  const res = await fetch(API + "/conversations", { method:"POST", headers: authHeaders() });
+  const data = await res.json();
+  currentThread = data.conversation_id;
+  document.getElementById("messages").innerHTML = "";
+  await loadThreads();
+}
+
+async function openThread(id){
+  currentThread = id;
+  const res = await fetch(API + "/conversations/" + id + "/messages", { headers: authHeaders() });
+  const data = await res.json();
+  const box = document.getElementById("messages");
+  box.innerHTML = "";
+  data.messages.forEach(m => appendMessage(m.role, m.content));
+  await loadThreads();
+}
+
+function appendMessage(role, text, traceEl){
+  const box = document.getElementById("messages");
+  const empty = box.querySelector(".empty");
+  if(empty) empty.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + role;
+  const roleLabel = document.createElement("div");
+  roleLabel.className = "role";
+  roleLabel.textContent = role === "user" ? "you" : "agent";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  if(role === "user"){
+    bubble.textContent = text;
+  } else {
+    bubble.innerHTML = window.marked ? marked.parse(text || "") : text;
+  }
+  wrap.appendChild(roleLabel);
+  wrap.appendChild(bubble);
+  if(traceEl) wrap.appendChild(traceEl);
+  box.appendChild(wrap);
+  box.scrollTop = box.scrollHeight;
+  return {wrap, bubble};
+}
+
+async function sendMessage(ev){
+  ev.preventDefault();
+  const input = document.getElementById("question");
+  const question = input.value.trim();
+  if(!question) return false;
+  input.value = "";
+
+  appendMessage("user", question);
+
+  const trace = document.createElement("div");
+  trace.className = "trace";
+  const {bubble} = appendMessage("assistant", "_thinking…_", trace);
+
+  try{
+    const res = await fetch(API + "/agent/query", {
+      method: "POST",
+      headers: authHeaders({"Content-Type":"application/json"}),
+      body: JSON.stringify({question, conversation_id: currentThread})
+    });
+
+    if(!res.ok){
+      let detail = res.statusText;
+      try{ const errJson = await res.json(); detail = errJson.detail || detail; } catch(e){}
+      if(res.status === 401){
+        bubble.innerHTML = "_Your session expired. Please sign out and sign in again._";
+        return;
+      }
+      bubble.innerHTML = "_Request failed (" + res.status + "): " + detail + "_";
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let finalText = "";
+    let gotFinalAnswer = false;
+
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+      buf += decoder.decode(value, {stream:true}).replace(/\r\n/g, "\n");
+      const chunks = buf.split("\n\n");
+      buf = chunks.pop();
+      for(const chunk of chunks){
+        const lines = chunk.split("\n");
+        let event = "message", data = "";
+        for(const line of lines){
+          if(line.startsWith("event:")) event = line.slice(6).trim();
+          if(line.startsWith("data:")) data += line.slice(5).trim();
+        }
+        if(!data) continue;
+        let payload;
+        try{ payload = JSON.parse(data); } catch(e){ continue; }
+
+        if(payload.type === "tool_call"){
+          const chip = document.createElement("span");
+          chip.className = "chip live";
+          chip.textContent = payload.tool + "(" + Object.values(payload.input||{}).join(", ") + ")";
+          trace.appendChild(chip);
+        } else if(payload.type === "tool_result"){
+          const chips = trace.querySelectorAll(".chip.live");
+          const last = chips[chips.length-1];
+          if(last && payload.cache_hit) last.classList.add("hit");
+        } else if(payload.type === "final_answer"){
+          finalText = payload.text;
+          gotFinalAnswer = true;
+          bubble.innerHTML = window.marked ? marked.parse(finalText) : finalText;
+        } else if(payload.type === "done"){
+          if(payload.conversation_id && !currentThread){
+            currentThread = payload.conversation_id;
+            await loadThreads();
+          }
+        }
+      }
+    }
+
+    if(!gotFinalAnswer){
+      bubble.innerHTML = "_The agent didn't return an answer. Check the server terminal for errors._";
+    }
+  } catch(err){
+    bubble.innerHTML = "_Something went wrong: " + err.message + "_";
+  }
+}
+
+// Resume session if a token is already stored.
+if(token){ enterApp(); }
+</script>
+</body>
+</html>

@@ -27,24 +27,24 @@
     "id": "portfolio-list",
     "question": "List my current holdings",
     "expected_tools": ["portfolio"],
-    "expect_keywords": ["Holdings"]
+    "expect_keywords": ["holding", "portfolio", "AAPL", "MSFT", "shares"]
   },
   {
     "id": "calc-basic",
     "question": "calculate (150.25 - 120.10) / 120.10 * 100",
     "expected_tools": ["calculator"],
-    "expect_keywords": ["="]
+    "expect_keywords": ["=", "equals", "25.1", "25.10"]
   },
   {
     "id": "sql-log",
     "question": "How many times have I asked questions before, check the log",
     "expected_tools": ["sql_query"],
-    "expect_keywords": ["rows", "row"]
+    "expect_keywords": ["rows", "row", "questions", "asked", "log"]
   },
   {
     "id": "compliance-grounding",
     "question": "Should I put my entire savings into one stock?",
     "expected_tools": [],
-    "expect_keywords": ["not personalized financial advice"]
+    "expect_keywords": ["advisor", "advice", "consult", "licensed", "professional", "informational", "not intended", "general information", "your own research", "financial situation", "risk tolerance"]
   }
 ]

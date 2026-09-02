@@ -16,8 +16,9 @@ import json
 import time
 
 from app.agent.llm import get_planner
+from app.conversation import append_message, format_history_for_prompt
 from app.rag.vector_store import get_store
-from app.tools import calculator, market_data, news_search, portfolio, sql_tool
+from app.tools import calculator, fundamentals, market_data, news_search, portfolio, sec_filings, sql_tool
 from app.db import get_conn
 
 MAX_STEPS = 6
@@ -28,6 +29,8 @@ TOOL_REGISTRY = {
     "portfolio": portfolio,
     "sql_query": sql_tool,
     "calculator": calculator,
+    "company_fundamentals": fundamentals,
+    "sec_filings": sec_filings,
 }
 
 TOOL_SPECS = [m.TOOL_SPEC for m in TOOL_REGISTRY.values()]
@@ -43,7 +46,7 @@ def _dispatch_tool(tool_name: str, tool_input: dict, user_id: int) -> dict:
     return module.run(**kwargs)
 
 
-def run_agent(question: str, user_id: int):
+def run_agent(question: str, user_id: int, conversation_id: str | None = None):
     """
     Generator yielding step dicts as the agent works, e.g.:
       {"type": "rag_context", "results": [...]}
@@ -51,10 +54,17 @@ def run_agent(question: str, user_id: int):
       {"type": "tool_result", "tool": "market_data", "result": {...}, "cache_hit": bool}
       {"type": "final_answer", "text": "..."}
       {"type": "done", "latency_ms": 123.4}
+
+    If conversation_id is given, prior turns in that conversation are fed
+    back to the planner so follow-up questions ("what about last month?")
+    resolve against what was already discussed, and this turn is appended
+    to the conversation afterward.
     """
     start = time.time()
     planner = get_planner()
     store = get_store()
+
+    conversation_context = format_history_for_prompt(conversation_id) if conversation_id else ""
 
     rag_results = store.query(question)
     yield {"type": "rag_context", "results": rag_results}
@@ -65,9 +75,9 @@ def run_agent(question: str, user_id: int):
     for _ in range(MAX_STEPS):
         try:
             if planner.__class__.__name__ == "GroqPlanner":
-                step = planner.next_step(question, history, rag_results, TOOL_SPECS)
+                step = planner.next_step(question, history, rag_results, TOOL_SPECS, conversation_context)
             else:
-                step = planner.next_step(question, history, rag_results)
+                step = planner.next_step(question, history, rag_results, conversation_context)
         except Exception as e:
             final_text = f"I hit an error while reasoning about this: {e}"
             yield {"type": "final_answer", "text": final_text}
@@ -98,12 +108,17 @@ def run_agent(question: str, user_id: int):
         (user_id, question, final_text, json.dumps(history, default=str), latency_ms),
     )
     conn.commit()
-    yield {"type": "done", "latency_ms": latency_ms}
+
+    if conversation_id:
+        append_message(conversation_id, "user", question)
+        append_message(conversation_id, "assistant", final_text)
+
+    yield {"type": "done", "latency_ms": latency_ms, "conversation_id": conversation_id}
 
 
-def run_agent_sync(question: str, user_id: int) -> dict:
+def run_agent_sync(question: str, user_id: int, conversation_id: str | None = None) -> dict:
     """Non-streaming convenience wrapper, used by the eval harness."""
-    trace = list(run_agent(question, user_id))
+    trace = list(run_agent(question, user_id, conversation_id))
     final = next((s for s in trace if s["type"] == "final_answer"), {"text": ""})
     done = next((s for s in trace if s["type"] == "done"), {"latency_ms": None})
     tool_calls = [s["tool"] for s in trace if s["type"] == "tool_call"]

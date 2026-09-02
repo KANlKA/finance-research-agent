@@ -45,7 +45,7 @@ class MockPlanner:
     the control flow a real function-calling LLM would drive.
     """
 
-    def next_step(self, question: str, history: list[dict], rag_context: list[dict]) -> LLMStep:
+    def next_step(self, question: str, history: list[dict], rag_context: list[dict], conversation_history: str = "") -> LLMStep:
         q = question.lower()
         called = {h["tool"] for h in history if h.get("type") == "tool_result"}
 
@@ -61,6 +61,12 @@ class MockPlanner:
 
         if symbol and any(k in q for k in ["news", "headline", "happening", "announcement"]) and "news_search" not in called:
             return LLMStep(kind="tool_call", tool_name="news_search", tool_input={"symbol": symbol})
+
+        if symbol and any(k in q for k in ["what does", "business", "sector", "industry", "p/e", "pe ratio", "valuation", "fundamentals"]) and "company_fundamentals" not in called:
+            return LLMStep(kind="tool_call", tool_name="company_fundamentals", tool_input={"symbol": symbol})
+
+        if symbol and any(k in q for k in ["10-k", "10-q", "8-k", "sec filing", "filings", "annual report", "quarterly report"]) and "sec_filings" not in called:
+            return LLMStep(kind="tool_call", tool_name="sec_filings", tool_input={"symbol": symbol})
 
         if any(k in q for k in ["how many times", "log", "history of my questions", "asked"]) and "sql_query" not in called:
             return LLMStep(
@@ -109,6 +115,15 @@ class MockPlanner:
                 parts.append(f"- Query returned {data['row_count']} row(s).")
             elif tool == "calculator":
                 parts.append(f"- {data['expression']} = {data['result']}")
+            elif tool == "company_fundamentals":
+                parts.append(
+                    f"- {data.get('short_name', data['symbol'])} ({data['symbol']}): "
+                    f"{data.get('sector')} / {data.get('industry')}. "
+                    f"P/E (trailing) {data.get('pe_ratio_trailing')}, EPS {data.get('eps_trailing')}."
+                )
+            elif tool == "sec_filings":
+                names = "; ".join(f"{f['form']} ({f['filing_date']})" for f in data.get("filings", [])[:5])
+                parts.append(f"- Recent SEC filings for {data['symbol']}: {names or 'none found.'}")
 
         if rag_context:
             parts.append("\nRelevant background:")
@@ -121,13 +136,16 @@ class MockPlanner:
         return "\n".join(parts)
 
 
-def _build_react_prompt(question: str, history: list[dict], rag_context: list[dict]) -> str:
+def _build_react_prompt(question: str, history: list[dict], rag_context: list[dict], conversation_history: str = "") -> str:
     ctx = "\n".join(f"[{r['id']}] {r['text']}" for r in rag_context)
     hist = json.dumps(history, default=str)
     return (
         f"You are a financial research assistant. Background knowledge:\n{ctx}\n\n"
-        f"Tool call history so far: {hist}\n\nUser question: {question}\n"
+        f"{conversation_history}"
+        f"Tool call history so far this turn: {hist}\n\nUser question: {question}\n"
         "Decide the next tool call, or give the final answer if you have enough info. "
+        "If the question refers back to something discussed earlier in the conversation "
+        "(e.g. 'that stock', 'what about last month'), resolve it using the prior conversation above. "
         "Always note this is not personalized financial advice."
     )
 
@@ -170,10 +188,10 @@ class GroqPlanner:
             timeout=60,
         )
 
-    def next_step(self, question: str, history: list[dict], rag_context: list[dict], tool_specs: list[dict]) -> LLMStep:
+    def next_step(self, question: str, history: list[dict], rag_context: list[dict], tool_specs: list[dict], conversation_history: str = "") -> LLMStep:
         import time
 
-        prompt = _build_react_prompt(question, history, rag_context)
+        prompt = _build_react_prompt(question, history, rag_context, conversation_history)
         payload = {
             "model": GROQ_MODEL,
             "messages": [{"role": "user", "content": prompt}],
